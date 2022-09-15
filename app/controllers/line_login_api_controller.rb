@@ -9,11 +9,10 @@ class LineLoginApiController < ApplicationController
     session[:state] = SecureRandom.urlsafe_base64
     base_authorization_url = 'https://access.line.me/oauth2/v2.1/authorize'
     response_type = 'code'
-    client_id = 'LINEログインチャネルのチャネルID'
-    #本番環境では環境変数などに保管する
+    client_id = Rails.application.credentials.line[:client_id]
     redirect_uri = CGI.escape(line_login_api_callback_url)
     state = session[:state]
-    scope = 'profile%20openid' #ユーザーに付与を依頼する権限
+    scope = 'profile%20openid'
 
     authorization_url = "#{base_authorization_url}?response_type=#{response_type}&client_id=#{client_id}&redirect_uri=#{redirect_uri}&state=#{state}&scope=#{scope}"
 
@@ -21,7 +20,6 @@ class LineLoginApiController < ApplicationController
   end
 
   def callback
-
     # CSRF対策のトークンが一致する場合のみ、ログイン処理を続ける
     if params[:state] == session[:state]
 
@@ -56,12 +54,11 @@ class LineLoginApiController < ApplicationController
       options = {
         body: {
           id_token: line_user_id_token,
-          client_id: 'LINEログインチャネルのチャネルID' # 本番環境では環境変数などに保管
+          client_id: Rails.application.credentials.line[:client_id]
         }
       }
 
       response = Typhoeus::Request.post(url, options)
-
       if response.code == 200
         JSON.parse(response.body)['sub']
       else
@@ -90,8 +87,8 @@ class LineLoginApiController < ApplicationController
         grant_type: 'authorization_code',
         code: code,
         redirect_uri: redirect_uri,
-        client_id: 'LINEログインチャネルのチャネルID', # 本番環境では環境変数などに保管
-        client_secret: 'LINEログインチャネルのチャネルシークレット' # 本番環境では環境変数などに保管
+        client_id: Rails.application.credentials.line[:client_id],
+        client_secret: Rails.application.credentials.line[:client_secret]
       }
     }
     response = Typhoeus::Request.post(url, options)
