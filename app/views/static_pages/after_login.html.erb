@@ -5,6 +5,6 @@
   <h1 class="font-bold text-4xl">ログイン後のページ</h1>
 </div>
 <div>
-  <h1 class="font-bold text-4xl">StaticPages#after_login</h1>
-  <p>Find me in app/views/static_pages/after_login.html.erb</p>
+  <% current_user = User.find(session[:user_id]) %>
+  <%= "現在ログイン中のユーザーのID：#{current_user.id}" %>
 </div>
